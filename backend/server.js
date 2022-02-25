@@ -1,69 +1,53 @@
 const { application } = require('express')
 const express = require('express')
 const dotenv = require('dotenv')
-const data = require('./data')
 const connectDB = require('./config/db')
 const userRoutes = require('./routes/userRoutes')
 const chatRoutes = require('./routes/chatRoutes')
-const messageRoutes = require('./routes/messageRoutes')
 
 const {
   notFound,
   errorHandler
 } = require('./middleware/Authentication/errorMiddleware')
-const User = require('./models/userModel')
-const Message = require('./models/messageModel')
-const Chat = require('./models/chatModel')
+const path = require('path')
 const { sendMessage, allMessages } = require('./controllers/messageController')
-const port = 5000
+const PORT = process.env.PORT || 5000
 
 const app = express() // to use express api methods
 dotenv.config() // to read .env file and assign it to process.env
 connectDB() // to connect to mongodb
 
-app.use(express.json()) //to get data in the json format
-
-app.get('/', (req, res) => {
-  res.send('api is working')
-})
-
-app.delete('/deleteMessages', async (req, res) => {
-  const messagesDelete = await Message.deleteMany({})
-  console.log(messagesDelete)
-  res.send('All messages got cleared')
-})
-
-app.delete('/deleteChats', async (req, res) => {
-  const chatsDelete = await Chat.deleteMany({})
-  console.log(chatsDelete)
-  res.send('All Chats got cleared')
-})
-
-app.delete('/deleteUsers', async (req, res) => {
-  const usersDelete = await User.deleteMany({})
-  console.log(usersDelete)
-  res.send('All users got cleared')
-})
-
-app.delete('/messages', async (req, res) => {
-  const messagesDelete = await Message.deleteMany({})
-  console.log(messagesDelete)
-  res.send('All messages got cleared')
-})
+app.use(express.json()) //to get data in the json format and app.use is for req,res,next calling
 
 app.use('/user', userRoutes)
 app.use('/chat', chatRoutes)
-app.use('/message', messageRoutes)
 
+// ---------- deploy ---------
+const _dirname1 = path.resolve()
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(_dirname1, '/frontend/build')))
+
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(_dirname1, 'frontend', 'build', 'index.html'))
+  )
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running')
+  })
+}
+// ---------- deploy ---------
+
+//error middlewares
 app.use(notFound)
 app.use(errorHandler)
 
-const PORT = process.env.port || port
 const server = app.listen(
   PORT,
   console.log(`Server listening at http://localhost:${PORT}`)
 )
 
+// messaging with Socket
 const io = require('socket.io')(server, {
   pingTimeout: 60000,
   cors: {

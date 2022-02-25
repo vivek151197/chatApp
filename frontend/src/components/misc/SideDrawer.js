@@ -162,7 +162,9 @@ const SideDrawer = () => {
                   onClick={() => {
                     setSelectedChat(notif.chat)
                     setNotification(
-                      notification.filter(n => n !== notif.sender._id)
+                      notification.filter(
+                        n => n.sender._id !== notif.sender._id
+                      )
                     )
                   }}
                 >

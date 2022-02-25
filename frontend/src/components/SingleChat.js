@@ -14,7 +14,7 @@ import ScrollableChat from './ScrollableChat'
 import { io } from 'socket.io-client'
 import './styles.css'
 
-const ENDPOINT = `http://localhost:5000`
+const ENDPOINT = `https://chat-geek.herokuapp.com/`
 let socket, selectedChatCompare
 export { socket }
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
